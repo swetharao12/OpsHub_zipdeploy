@@ -1,0 +1,189 @@
+#
+# @(#) $Id: fsm_server.ini.master 2934 2011-04-11 13:42:29Z hemphill $
+#
+# Copyright (c) 2005 by Metron Aviation, Inc.
+# 131 Elden Street, Suite 200, Herndon, VA 20170
+# ALL RIGHTS RESERVED.
+#
+# $Author: hemphill $
+# $Date: 2011-04-11 09:42:29 -0400 (Mon, 11 Apr 2011) $
+#
+
+
+# Top Level Parameters
+#
+# Logging Options
+LOG_DIR                 /opt/FSM/trace
+LOG_NAME                fsm_server
+LOG_LEVEL               0x7F0
+LOG_FLUSHING            false
+#
+# Dual Level Logging Options - For use only when instructed by FSM Support
+#LOG_CRITICAL_DIR       /opt/FSM/trace
+#LOG_CRITICAL_NAME      fsm_server_critical
+#LOG_CRITICAL_LEVEL     0x700
+#
+# Security Options
+PASSWORD_FILE           /opt/FSM/config/password.fsm
+#
+#
+# Kernel Commands and Parameters - MSG_SERVICE Must Be First Service Loaded
+#
+KERNEL
+{
+
+#            LOAD COMMAND         LEVEL    JAVA CLASSNAME                       BLOCK NAME
+#            -------------        -----    --------------                       ----------
+        KC   loadCriticalService  FULL     com.metronaviation.fsm.server.ExclusiveFSMMsgService MSG_SERVICE
+        KC   loadCriticalService  FULL     com.metronaviation.fsm.server.etms_mgr.adl_mgr.ADLManager ADL_MANAGER1
+        KC   loadCriticalService  FULL     com.metronaviation.fsm.server.etms_mgr.fd_mgr.FDManager FD_MANAGER1
+        KC   loadCriticalService  TRUSTED  com.metronaviation.fsm.server.hist_mgr.HistManager HIST_MANAGER1
+        KC   loadCriticalService  TRUSTED  com.metronaviation.fsm.server.fsm_mgr.FSMManager FSM_MANAGER1
+        KC   loadCriticalService  KERNEL   com.metronaviation.fsm.server.ui_mgr.server.Controller UI_MANAGER1
+}
+#
+#
+# Configuration Blocks For Services Started In Kernel Commands Block
+# One Block Is Required For Each Service
+#
+MSG_SERVICE
+{
+        ROUTER
+        {
+                set_ThreadPoolNumber   10
+                set_ThreadPoolPolicy   POLICY_WAIT
+        }
+        SELECTOR_POOL
+        {
+                set_NumThreads         1
+#               LOG_DIR                /opt/FSM/trace
+#                       LOG_NAME               fsm_server_selpool
+        }
+        NIO_RECEIVER
+        {
+                set_Address   localhost        10666
+                CONNECTION
+                {
+                        SET_DEBUG_METHODS false
+                        use_Blowfish   STREAM  TestKey1
+                        set_MaxWriteTime       180000
+                }
+        }
+        NIO_RECEIVER
+        {
+                set_Address   hostname         10666
+                CONNECTION
+                {
+                        SET_DEBUG_METHODS false
+                        use_Blowfish   STREAM  TestKey1
+                        set_MaxWriteTime       180000
+                }
+        }
+}
+ADL_MANAGER1
+{
+        SERVICE_NAME      FsmCtl:hzsrmlapp421:ADLManager
+        LOG_PREFIX        ADL_MGR1
+        MIN_STATUS_DELAY  5000
+        AOC_USERID        AAL35
+        CLIENT_TAG        35
+        AIRLINE_NAME      AAL
+        NEW_DATE          0800
+        DEFAULT_DATA_TYPE 2
+        AIRPORT_TIMEOUT   30
+        HB_INTERVAL       150
+        HB_MAX_TIMEOUTS   3
+        ADL_REPORTS       /opt/FSM/adl_files
+        WRITE_ADL         true
+        ZIP_ADL           false
+        WRITE_DELTA       false
+        ZIP_DELTA         false
+        WRITE_BROADCAST   false
+        ZIP_BROADCAST     false
+        BROADCAST_DIR     /opt/FSM/adl_files
+        AIRPORT_AUTO      1
+        FCA_AUTO          1
+        MSG_DELAY         100
+        RECONNECT_TIME    60
+        CONNECT_INTERVAL  10
+        TIMER_TASK        com.metronaviation.fsm.server.etms_mgr.adl_mgr.Watchdog
+        {
+                TIMER_PERIOD 780000
+        }
+        QUEUE_WARNING_SIZE         160
+        QUEUE_WARNING_INTERVAL 20
+        ETMS_ENCRYPT_KEY_FILE  /opt/FSM/static_data/etms.key
+        ETMS_CONNECTION_INFO 155.178.171.198 8050
+
+}
+FD_MANAGER1
+{
+        SERVICE_NAME      FsmCtl:hzsrmlapp421:FDManager
+        LOG_PREFIX        FD_MGR1
+        MIN_STATUS_DELAY  5000
+        AOC_USERID        AAL2
+        CLIENT_TAG        35
+        RECONNECT_TIME    60
+        CONNECT_INTERVAL  10
+        HB_INTERVAL       150
+        HB_MAX_TIMEOUTS   3
+        QUEUE_WARNING_SIZE         50
+        QUEUE_WARNING_INTERVAL 10
+        ETMS_CONNECTION_INFO 155.178.171.193 8061
+
+}
+HIST_MANAGER1
+{
+        SERVICE_NAME      FsmCtl:hzsrmlapp421:HistManager
+        LOG_PREFIX        HistMgr1
+        MIN_STATUS_DELAY  5000
+        FLIGHT_DATA_DIR   /opt/FSM/data/flight_data
+        ARCHIVE_AIRPORT   ***.APT
+        ARCHIVE_AIRPORT   ***.FCA
+        ARCHIVE_AIRPORT   ***.FEA
+	MONITOR_AIRPORT   ATL 2
+	MONITOR_AIRPORT   BOS 2
+	MONITOR_AIRPORT   CLT 2
+	MONITOR_AIRPORT   CYYZ 2
+	MONITOR_AIRPORT   DCA 2
+	MONITOR_AIRPORT   DEN 2
+	MONITOR_AIRPORT   DFW 2
+	MONITOR_AIRPORT   EWR 2
+	MONITOR_AIRPORT   JFK 2
+	MONITOR_AIRPORT   LAX 2
+	MONITOR_AIRPORT   LGA 2
+	MONITOR_AIRPORT   MIA 2
+	MONITOR_AIRPORT   MSP 2
+	MONITOR_AIRPORT   ORD 2
+	MONITOR_AIRPORT   PHL 2
+	MONITOR_AIRPORT   PHX 2
+	MONITOR_AIRPORT   SFO 2
+		ARCHIVER          com.metronaviation.fsm.server.hist_mgr.HistoricalArchiver
+#               ARCHIVER          com.metronaviation.fsm.server.hist_mgr.BarGraphArchiver
+#               {
+#                       BG_DATA_DIR   /opt/FSM/data/bg_data
+#                       FILTER_FILE   /opt/FSM/config/filter.ini
+#               }
+}
+FSM_MANAGER1
+{
+        SERVICE_NAME      FsmCtl:hzsrmlapp421:FSMManager
+        LOG_PREFIX        FsmMgr1
+        NEW_DATE          0800
+        MIN_STATUS_DELAY  5000
+        HIST_MGR_SVC_NAME FsmCtl::HistManager
+        ADL_MGR_SVC_NAME FsmCtl::ADLManager
+        AIRLINE_NAME      AAL
+        ENCRYPT_CLIENTS   false
+        ENCRYPT_KEY       abcdefghijklmnopqrstuvwxyz
+        AIRPORTS_FILE     /opt/FSM/static_data/airports.dat
+        CENTER_FILE       /opt/FSM/static_data/center.dat
+        OPSNET_FILE       /opt/FSM/static_data/opsnet.dat
+        SHOW_RUN_BUTTON   false
+}
+UI_MANAGER1
+{
+        SERVICE_NAME      FsmCtl:hzsrmlapp421:UIManager
+        LOG_PREFIX        UIMgr1
+        MIN_STATUS_DELAY  5000
+}
