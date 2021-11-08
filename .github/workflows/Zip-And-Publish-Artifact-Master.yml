@@ -32,5 +32,5 @@ jobs:
           
       - uses: actions/upload-artifact@v1
         with:
-          name: my-artifact
+          name: fsm-adl-artifact
           path: ${{ github.workspace }}/result.zip
