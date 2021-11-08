@@ -1,0 +1,13 @@
+# Verify Flight Hub file to Queue Adapter is running, if not start it.
+#*/1 * * * * cd /opt/app/adl/bin; ./CheckADLFileToQ.sh &> /dev/null
+#If ADL Collector is running and FSM is not, start FSM
+#* * * * * cd /opt/FSM; ./monitorFSM.sh &> /dev/null
+# Delete ADL files older than 60 days from archive directory
+#5 1 * * * find /opt/FSM/data/flight_data -type f -mtime +60 -exec rm {} \;
+# Delete ADL files older than 4 days from adl_files directory
+#10 1 * * * find /opt/FSM/adl_files -type f -mtime +4 -exec rm {} \;
+# Run ADL file monitor delay 
+#*/1 * * * * /opt/FSM/adl_monitor_scripts/touchMonitorAdl.sh &
+# Email ADL monitor delay alerts 
+#*/3 * * * * /opt/FSM/adl_monitor_scripts/emailMonitorAdl.sh &
+

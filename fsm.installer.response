@@ -1,0 +1,25 @@
+# install4j response file for Flight Schedule Monitor 13.3
+fsm.adlHost1=155.178.171.193
+fsm.adlHost2=155.178.152.130
+fsm.adlPort1=8050
+fsm.adlPort2=8050
+fsm.adlTag=35
+fsm.adlUserID=AAL35
+fsm.airlineID=AAL
+fsm.airportAuto$Integer=0
+fsm.dataDirectory=/opt/FSM/data
+fsm.fcaAuto$Integer=0
+fsm.fdHost1=155.178.171.193
+fsm.fdHost2=
+fsm.fdPort1=8061
+fsm.fdPort2=
+fsm.fdTag=35
+fsm.fdUserID=AAL2
+fsm.installService$Boolean=true
+fsm.serviceName=hzsrmlapp421.horizon.plano.aa.com
+fsm.startService$Boolean=false
+sys.adminRights$Boolean=true
+sys.component.17$Boolean=true
+sys.component.18$Boolean=false
+sys.installationDir=/opt/FSM
+sys.languageId=en
